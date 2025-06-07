@@ -242,8 +242,8 @@ export default function MathSurface() {
     }
 
     // Escolha do esquema de cores baseado na função
-    let color1, color2, color3, color4, color5;
-    
+    let color1: THREE.Color, color2: THREE.Color, color3: THREE.Color, color4: THREE.Color, color5: THREE.Color;
+
     if (st === "exponential") {
       // Hot colormap para ondas exponenciais
       color1 = new THREE.Color(0x000000); // Preto
@@ -259,35 +259,38 @@ export default function MathSurface() {
       color4 = color2; // Duplicado para compatibilidade
       color5 = color3; // Duplicado para compatibilidade
     }
-    
+
+    const tempColor = new THREE.Color();
+
     // Apply Z and colors
     for (let i = 0; i < positions.count; i++) {
       const z = tempZValues[i];
       positions.setZ(i, z);
 
       const normalizedZ = (zMax > zMin) ? (z - zMin) / (zMax - zMin) : 0.5;
-      const color = new THREE.Color();
-      
+
       if (st === "exponential") {
         // Hot colormap com 5 cores
         if (normalizedZ < 0.25) {
-          color.lerpColors(color1, color2, normalizedZ * 4);
+          tempColor.lerpColors(color1, color2, normalizedZ * 4);
         } else if (normalizedZ < 0.5) {
-          color.lerpColors(color2, color3, (normalizedZ - 0.25) * 4);
+          tempColor.lerpColors(color2, color3, (normalizedZ - 0.25) * 4);
         } else if (normalizedZ < 0.75) {
-          color.lerpColors(color3, color4, (normalizedZ - 0.5) * 4);
+          tempColor.lerpColors(color3, color4, (normalizedZ - 0.5) * 4);
         } else {
-          color.lerpColors(color4, color5, (normalizedZ - 0.75) * 4);
+          tempColor.lerpColors(color4, color5, (normalizedZ - 0.75) * 4);
         }
       } else {
         // Cool to Warm com 3 cores
         if (normalizedZ < 0.5) {
-          color.lerpColors(color1, color2, normalizedZ * 2);
+          tempColor.lerpColors(color1, color2, normalizedZ * 2);
         } else {
-          color.lerpColors(color2, color3, (normalizedZ - 0.5) * 2);
+          tempColor.lerpColors(color2, color3, (normalizedZ - 0.5) * 2);
         }
       }
-      color.toArray(colors, i * 3);
+      colors[i * 3] = tempColor.r;
+      colors[i * 3 + 1] = tempColor.g;
+      colors[i * 3 + 2] = tempColor.b;
     }
 
     meshRef.current.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
